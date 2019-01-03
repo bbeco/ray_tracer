@@ -6,6 +6,7 @@ It is based on the recursive ray tracer described by Whitted's An Improved Illum
 ## How to build and run the project
 
 This is written with [Typescript](https://www.typescriptlang.org/). I installed the typescript transpiler with [Yarn](https://yarnpkg.com/en/).
+I also used [Webpack](https://webpack.js.org) to import different js modules.
 
 I also used [Direnv](https://github.com/direnv/direnv) to correcly set up the export needed to use `tsc`.
 
