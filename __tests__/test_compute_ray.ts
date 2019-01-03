@@ -1,10 +1,10 @@
-import { Camera, ImageSensor } from "../src/Camera"
+import { Camera, ImageSensor } from "../src/Camera";
 import { Ray } from "../src/Ray";
 import { Vector3 } from "../src/Vector3";
 
 test("Testing computeRay()", () => {
-    let sensor = new ImageSensor([3, 3]);
-    let camera = new Camera(sensor);
+    const sensor = new ImageSensor([3, 3]);
+    const camera = new Camera(sensor);
 
     let expected = new Ray(new Vector3(), new Vector3([0, 0, -1]));
 

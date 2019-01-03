@@ -1,6 +1,13 @@
 import { Vector3 } from "./Vector3";
 
 export class Sphere {
+
+    // The position of the centre of the sphere
+    public center: Vector3;
+
+    // The radius of the sphere
+    public radius: number;
+
     // Diffuse reflection constant
     private kD: number;
 
@@ -12,12 +19,6 @@ export class Sphere {
 
     // Index of refraction;
     private kN: number;
-
-    // The position of the centre of the sphere
-    center: Vector3;
-
-    // The radius of the sphere
-    radius: number;
 
     constructor() {
         this.kD = 1.0;

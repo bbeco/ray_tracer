@@ -1,9 +1,9 @@
-import { Vector3 } from "./Vector3"
+import { Vector3 } from "./Vector3";
 
 export class PointLight {
-    color: Vector3;
+    public color: Vector3;
 
-    position: Vector3;
+    public position: Vector3;
 
     constructor() {
         this.position = new Vector3([0, 1, 0]);

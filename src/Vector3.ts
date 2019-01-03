@@ -1,9 +1,9 @@
 export class Vector3 {
-    x: number;
-    y: number;
-    z: number;
+    public x: number;
+    public y: number;
+    public z: number;
 
-    constructor(pos?: Array<number>) {
+    constructor(pos?: number[]) {
         if (pos) {
             this.x = pos[0];
             this.y = pos[1];
@@ -15,12 +15,12 @@ export class Vector3 {
         }
     }
 
-    lengthSq(): number {
+    public lengthSq(): number {
         return (Math.pow(this.x, 2), Math.pow(this.y, 2), Math.pow(this.z, 2));
     }
 
-    normalize(): Vector3 {
-        let lengthSq = this.lengthSq();
+    public normalize(): Vector3 {
+        const lengthSq = this.lengthSq();
         this.x /= lengthSq;
         this.y /= lengthSq;
         this.z /= lengthSq;
