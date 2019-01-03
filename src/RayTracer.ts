@@ -31,4 +31,4 @@ for (let v = 0; v < canv.height; ++v) {
     }
 }
 
-console.log("It works! Sort of...");
+console.log("It works! (Sort of)");
