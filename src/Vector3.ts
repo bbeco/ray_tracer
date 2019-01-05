@@ -26,4 +26,40 @@ export class Vector3 {
         this.z /= lengthSq;
         return this;
     }
+
+    public set(x: number, y: number, z: number): Vector3 {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        return this;
+    }
+
+    public clone(): Vector3 {
+        return (new Vector3()).set(this.x, this.y, this.z);
+    }
+
+    public sub(v: Vector3): Vector3 {
+        this.x -= v.x;
+        this.y -= v.y;
+        this.z -= v.z;
+        return this;
+    }
+
+    public add(v: Vector3): Vector3 {
+        this.x += v.x;
+        this.y += v.y;
+        this.z += v.z;
+        return this;
+    }
+
+    public multiplyScalar(s: number): Vector3 {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
+        return this;
+    }
+
+    public dot(v: Vector3): number {
+        return this.x * v.x + this.y * v.y + this.z * v.z;
+    }
 }
