@@ -19,6 +19,7 @@
   "scripts": {
     "build": "tslint --project . && webpack --config webpack.config.js",
     "test": "jest",
-    "clean": "rm -fr dist/"
+    "clean": "rm -fr dist/",
+    "watch": "tslint --project . && webpack --config webpack.config.js --watch"
   }
 }
