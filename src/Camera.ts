@@ -11,8 +11,13 @@ export class ImageSensor {
     // pixel density in the vertical direction.
     public kV: number;
 
-    // The focal length. Even thougth this does not depends on the image sensor, we keep it here because this is yet
-    // another intrinsic parameter
+    // principal point coordinates
+    public u0: number;
+    public v0: number;
+
+    // The focal length.
+    // Even though this does not depends on the image sensor, we keep it here because this is yet another intrinsic
+    // parameter
     public fLength: number;
 
     constructor(res?: number[], f?: number, kU?: number, kV?: number) {
@@ -28,10 +33,13 @@ export class ImageSensor {
             this.res = [640, 480];
         }
 
-        this.fLength = f ? f : 1.0;
+        this.fLength = f ? f : 0.3;
 
         this.kU = kU ? kU : 1.0;
         this.kV = kV ? kV : 1.0;
+        this.u0 = Math.floor(this.res[0] / 2);
+        this.v0 = Math.floor(this.res[1] / 2);
+
     }
 }
 
@@ -50,9 +58,11 @@ export class Camera {
         }
 
         const direction = new Vector3();
-        direction.x = (uIndex - this.sensor.res[0] / 2) * this.sensor.fLength / this.sensor.kU + this.sensor.kU / 2;
-        direction.y = -(vIndex - this.sensor.res[0] / 2) * this.sensor.fLength / this.sensor.kV - this.sensor.kV / 2;
-        direction.z = -1;
+        direction.x = this.sensor.fLength * (uIndex - this.sensor.u0) / this.sensor.kU;
+        // The order of the subtraction parameter is inverted w.r.t. the previous one, such that it can pass the test
+        // (the problem was -0 is not equal to 0, thus one of the test failed)
+        direction.y = this.sensor.fLength * (this.sensor.v0 - vIndex) / this.sensor.kV;
+        direction.z = -this.sensor.fLength;
 
         return new Ray(new Vector3([0, 0, 0]), direction.normalize());
     }
