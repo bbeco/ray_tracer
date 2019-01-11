@@ -19,11 +19,15 @@ export class Vector3 {
         return Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2);
     }
 
+    public length(): number {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    }
+
     public normalize(): Vector3 {
-        const lengthSq = this.lengthSq();
-        this.x /= lengthSq;
-        this.y /= lengthSq;
-        this.z /= lengthSq;
+        const length = this.length();
+        this.x /= length;
+        this.y /= length;
+        this.z /= length;
         return this;
     }
 
