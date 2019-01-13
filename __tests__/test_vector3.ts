@@ -22,3 +22,13 @@ describe("Testing clamping", () => {
         expect(v.clamp(min, max)).toEqual(expected);
     });
 });
+
+describe("Testing component-wise multiplication", () => {
+    test("component-wise multiplication", () => {
+        const a = new Vector3([1, 0, 2]);
+        const b = new Vector3([-1, 10, 3]);
+        const expected = new Vector3([-1, 0, 6]);
+
+        expect(a.multiplyVectors(a, b)).toEqual(expected);
+    });
+});

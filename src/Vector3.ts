@@ -20,7 +20,7 @@ export class Vector3 {
     }
 
     public length(): number {
-        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+        return Math.sqrt(this.lengthSq());
     }
 
     public normalize(): this {
@@ -56,10 +56,26 @@ export class Vector3 {
         return this;
     }
 
+    /**
+     * Scale this vector by the given scaling factor
+     * @param s The scaling factor
+     */
     public multiplyScalar(s: number): this {
         this.x *= s;
         this.y *= s;
         this.z *= s;
+        return this;
+    }
+
+    /**
+     * Sets this vector equals to a * b, component-wise
+     * @param a
+     * @param b
+     */
+    public multiplyVectors(a: Vector3, b: Vector3): this {
+        this.x = a.x * b.x;
+        this.y = a.y * b.y;
+        this.z = a.z * b.z;
         return this;
     }
 
