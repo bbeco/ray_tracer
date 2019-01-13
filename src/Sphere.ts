@@ -9,8 +9,11 @@ export class Sphere {
     // The radius of the sphere
     public radius: number;
 
+    // The diffuse color of the sphere
+    private _cDiffuse: Vector3;
+
     // Diffuse reflection constant
-    private kD: number;
+    private _kD: number;
 
     // Specular reflection coefficient
     private kS: number;
@@ -22,13 +25,22 @@ export class Sphere {
     private kN: number;
 
     constructor() {
-        this.kD = 1.0;
+        this._cDiffuse = new Vector3([1, 1, 1]);
+        this._kD = 1.0;
         this.kS = 1.0;
         this.kT = 1.0;
         this.kN = 1.0;
 
         this.center = new Vector3();
         this.radius = 1.0;
+    }
+
+    get kD(): number {
+        return this._kD;
+    }
+
+    get cDiffuse(): Vector3 {
+        return this._cDiffuse;
     }
 
     // returns the normal of the point of the sphere that is the closest to the query point
