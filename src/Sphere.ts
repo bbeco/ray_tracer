@@ -48,6 +48,31 @@ export class Sphere {
         return query.clone().sub(this.center).normalize();
     }
 
+    /**
+     * @brief Compute the reflection of r at point p.
+     *
+     * This function assumes the dot product between the viewer direction and the normal is less than 0.
+     *
+     * @private
+     * @param {Vector3} p
+     * @param {Ray} r
+     * @returns
+     * @memberof Sphere
+     */
+    public computeReflectedRay(p: Vector3, r: Ray) {
+        const n = this.normal(p);
+        if (r.direction.dot(n) === 0) {
+            return new Ray(p, r.direction);
+        }
+
+        const v = r.direction.clone();
+        // the negative sign is due to the fact that v.dot(n) is always negative, and the formula requires its absolute
+        // value
+        v.multiplyScalar(-1 / v.dot(n));
+        const reflectedDir = v.add(n.multiplyScalar(2));
+        return new Ray(p, reflectedDir.normalize());
+    }
+
     // In case there are two intersection points, this method returns the one that is closer to the ray's origin.
     public intersect(ray: Ray): Vector3 | null {
         const v = ray.origin.clone().sub(this.center);
