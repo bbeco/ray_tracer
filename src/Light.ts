@@ -5,8 +5,8 @@ export class PointLight {
 
     public position: Vector3;
 
-    constructor() {
-        this.position = new Vector3([0, 1, 0]);
-        this.color = new Vector3([1, 1, 1]);
+    constructor(position: Vector3, color?: Vector3) {
+        this.position = position;
+        this.color = color ? color : new Vector3([1, 1, 1]);
     }
 }

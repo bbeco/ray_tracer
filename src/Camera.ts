@@ -39,12 +39,13 @@ export class ImageSensor {
         this.kV = kV ? kV : 1.0;
         this.u0 = Math.floor(this.res[0] / 2);
         this.v0 = Math.floor(this.res[1] / 2);
+    }
 
+    public printProjectionMatrix() {
         console.log("camera matrix:\n" +
             `${this.fLength * this.kU} 0 ${this.u0}\n` +
             `${this.fLength * this.kV} 0 ${this.v0}\n` +
             `0 0 1`);
-
     }
 }
 
@@ -65,7 +66,7 @@ export class Camera {
         const direction = new Vector3();
         direction.x = (uIndex - this.sensor.u0) / (this.sensor.fLength * this.sensor.kU);
         // The order of the subtraction parameter is inverted w.r.t. the previous one, such that it can pass the test
-        // (the problem was -0 is not equal to 0, thus one of the test failed)
+        // (the problem was -0 is not equal to 0, which caused one of the test to fail)
         direction.y = (this.sensor.v0 - vIndex) / (this.sensor.fLength * this.sensor.kV);
         direction.z = -1;
 

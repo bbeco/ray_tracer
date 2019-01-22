@@ -13,7 +13,7 @@ const ctx = canv.getContext("2d");
 console.log(rayTracer.scene.camera.sensor);
 for (let v = 0; v < canv.height; ++v) {
     for (let u = 0; u < canv.width; ++u) {
-        const color = rayTracer.trace(u, v);
+        const color = rayTracer.trace(rayTracer.scene.camera.computeRay(u, v));
         ctx!.fillStyle = `rgb(
             ${Math.floor(color.x * 256)},
             ${Math.floor(color.y * 256)},

@@ -1,4 +1,5 @@
 import { Ray } from "./Ray";
+import { eps } from "./utils";
 import { Vector3 } from "./Vector3";
 
 export class Sphere {
@@ -10,7 +11,7 @@ export class Sphere {
     public radius: number;
 
     // The diffuse color of the sphere
-    private _cDiffuse: Vector3;
+    public cDiffuse: Vector3;
 
     // Diffuse reflection constant
     private _kD: number;
@@ -25,7 +26,7 @@ export class Sphere {
     private kN: number;
 
     constructor() {
-        this._cDiffuse = new Vector3([1, 1, 1]);
+        this.cDiffuse = new Vector3([1, 1, 1]);
         this._kD = 1.0;
         this.kS = 1.0;
         this.kT = 1.0;
@@ -39,13 +40,22 @@ export class Sphere {
         return this._kD;
     }
 
-    get cDiffuse(): Vector3 {
-        return this._cDiffuse;
-    }
-
     // returns the normal of the point of the sphere that is the closest to the query point
     public normal(query: Vector3): Vector3 {
         return query.clone().sub(this.center).normalize();
+    }
+
+    /**
+     * Compute the refraction of r at point p.
+     *
+     * @private
+     * @param {Vector3} p
+     * @param {Ray} r
+     * @returns
+     * @memberof Sphere
+     */
+    public computeRefractedRay(p: Vector3, r: Ray) {
+        return new Ray(p, new Vector3());
     }
 
     /**
@@ -70,7 +80,11 @@ export class Sphere {
         // value
         v.multiplyScalar(-1 / v.dot(n));
         const reflectedDir = v.add(n.multiplyScalar(2));
-        return new Ray(p, reflectedDir.normalize());
+        reflectedDir.normalize();
+
+        // The ray's origin is translated a little toward the normal to prevent the object itself from shadowing the ray
+        const origin = p.clone().add(this.normal(p).multiplyScalar(eps));
+        return new Ray(origin, reflectedDir.normalize());
     }
 
     // In case there are two intersection points, this method returns the one that is closer to the ray's origin.

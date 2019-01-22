@@ -83,6 +83,13 @@ export class Vector3 {
         return this.x * v.x + this.y * v.y + this.z * v.z;
     }
 
+    /**
+     * Clamp this vector's components to the range [`min`, `max`] (extremes are included).
+     * Clamping is performed component wise.
+     *
+     * @param min The minimum allowed value
+     * @param max The maximum allowed value
+     */
     public clamp(min: Vector3, max: Vector3): this {
         const clampValue = (val: number, minV: number, maxV: number) => Math.max(Math.min(val, maxV), minV);
 
