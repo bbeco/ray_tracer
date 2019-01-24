@@ -16,6 +16,14 @@ export function distanceSq(a: Vector3, b: Vector3): number {
     return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2);
 }
 
-export function areAlmostEqual(a: Vector3, b: Vector3) {
+export function areAlmostEqual(a: Vector3, b: Vector3): boolean {
     return distanceSq(a, b) <= epsSq;
 }
+
+export const clampVector = (() => {
+    const min = new Vector3([0, 0, 0]);
+    const max = new Vector3([1, 1, 1]);
+    return (v: Vector3): void => {
+        v.clamp(min, max);
+    };
+})();
