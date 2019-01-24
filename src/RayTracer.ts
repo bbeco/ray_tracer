@@ -3,7 +3,7 @@ import { IntersectionPoint as Intersection } from "./IntersectionPoint";
 import { PointLight as Light } from "./Light";
 import { Ray } from "./Ray";
 import { Sphere } from "./Sphere";
-import { distanceSq } from "./utils";
+import { clampVector, distanceSq } from "./utils";
 import { Vector3 } from "./Vector3";
 
 class Scene {
@@ -18,10 +18,17 @@ class Scene {
 
         const s1 = new Sphere();
         s1.center.set(0.5, -1, -8.01);
-        s1.cDiffuse.set(1, 0, 0);
+        s1.color.set(1, 0, 0);
         s1.radius = 1;
 
-        this.objectList = [s0, s1];
+        const s2 = new Sphere();
+        s2.center.set(-0.5, -0.5, -6.01);
+        s2.color.set(1, 1, 1);
+        s2.kN = 2.0;
+        s2.radius = 2.0;
+
+        this.objectList = [s0, s1, s2];
+        // this.objectList = [s0, s1];
         this.lightList = [
             new Light(new Vector3([0, 1.5, -6.5]), new Vector3([1, 1, 1])),
         ];
@@ -31,10 +38,16 @@ class Scene {
 }
 
 export class RayTracer {
-    public static MaxDepth = 2;
+    public static readonly MaxDepth = 10;
 
-    private static minColor = new Vector3([0, 0, 0]);
-    private static maxColor = new Vector3([1, 1, 1]);
+    /**
+     * ambient light.
+     *
+     * @private
+     * @static
+     * @memberof RayTracer
+     */
+    public static readonly ambient = new Vector3([0.01, 0.01, 0.01]);
 
     private static backgroundColor = new Vector3();
 
@@ -55,17 +68,6 @@ export class RayTracer {
      */
     private static eps = 1e-6;
 
-    /**
-     * ambient light.
-     *
-     * @private
-     * @static
-     * @memberof RayTracer
-     */
-    private static ambient = new Vector3([0.01, 0.01, 0.01]);
-
-    private static colorRange = [new Vector3([0, 0, 0]), new Vector3([1, 1, 1])];
-
     public scene: Scene;
 
     constructor(res?: number[]) {
@@ -79,69 +81,89 @@ export class RayTracer {
         sensor.kV = sensor.kU;
     }
 
-    get ambient(): Vector3 {
-        return RayTracer.ambient;
-    }
+    public trace(r: Ray, depth?: number): Vector3 {
+        const sIntensity = new Vector3();
+        const tIntensity = new Vector3();
+        const color = new Vector3();
+        const closestInt = new Intersection();
 
-    public trace(ray: Ray, depth?: number): Vector3 {
         if (depth === undefined) {
             depth = RayTracer.MaxDepth;
         }
 
         if (depth === 0) {
-            return new Vector3();
+            return color;
         }
 
-        const closestInt = new Intersection();
         for (const obj of this.scene.objectList) {
-            const intPoint = obj.intersect(ray);
+            const intPoint = obj.intersect(r);
             if (!intPoint) {
                 continue;
             }
-            const disSq = distanceSq(intPoint, ray.origin);
+            const disSq = distanceSq(intPoint, r.origin);
             if (disSq < closestInt.distanceSq) {
                 closestInt.set(intPoint, obj.normal(intPoint), obj, disSq);
             }
         }
 
         if (closestInt.distanceSq === Infinity) {
-            return RayTracer.backgroundColor;
+            return color;
         }
 
-        const color = new Vector3();
-        const reflected = closestInt.obj!.computeReflectedRay(closestInt.point!, ray);
-        const refracted = closestInt.obj!.computeRefractedRay(closestInt.point!, ray);
+        const intersectedObj = closestInt.obj!;
+        const intersectionPoint = closestInt.point!;
+        const rReflected = intersectedObj.computeReflectedRay(intersectionPoint, r);
+        const rRefracted = intersectedObj.computeRefractedRay(intersectionPoint, r);
 
-        color.add(this.trace(reflected, depth - 1));
-        color.add(this.trace(refracted, depth - 1));
+        sIntensity.copy(this.trace(rReflected, depth - 1));
+        if (rRefracted) {
+            tIntensity.copy(this.trace(rRefracted, depth - 1));
+        } else {
+            tIntensity.set(0, 0, 0);
+        }
 
-        color.add(this.shade(closestInt));
-
-        return color;
+        return this.shade(closestInt, sIntensity, tIntensity);
     }
 
-    public shade(intersection: Intersection): Vector3 {
-        const color = RayTracer.ambient.clone();
+    public shade(intersection: Intersection, sIntensity: Vector3, tIntensity: Vector3): Vector3 {
+        const color = new Vector3();
         const diffuse = new Vector3();
+        const specular = new Vector3();
+        const transmitted = new Vector3();
+
+        const intersectedObj = intersection.obj!;
+        const point = intersection.point!;
+        const normal = intersection.normal!;
+
         for (const light of this.scene.lightList) {
-            const l = light.position.clone().sub(intersection.point!).normalize();
+            const l = light.position.clone().sub(point).normalize();
             const lightRay = new Ray(
-                intersection.point!.add(intersection.normal!.clone().multiplyScalar(RayTracer.eps)),
+                point.add(normal.clone().multiplyScalar(RayTracer.eps)),
                 l);
+            let shaded = false;
             for (const obj of this.scene.objectList) {
-                if (!obj.intersect(lightRay)) {
-                    const dot = l.dot(intersection.normal!);
-                    if (dot >= 0) {
-                        diffuse.add(light.color.clone().multiplyScalar(dot));
-                    }
+                if (obj.intersect(lightRay)) {
+                    shaded = true;
+                    break;
+                }
+            }
+            if (!shaded) {
+                const dot = l.dot(normal);
+                if (dot >= 0) {
+                    diffuse.add(light.color.clone().multiplyScalar(dot));
                 }
             }
         }
-        diffuse.multiplyVectors(diffuse, intersection.obj!.cDiffuse)
-            .multiplyScalar(intersection.obj!.kD)
-            .clamp(RayTracer.colorRange[0], RayTracer.colorRange[1]);
 
-        color.add(diffuse).clamp(RayTracer.colorRange[0], RayTracer.colorRange[1]);
-        return color;
+        diffuse.multiplyScalar(intersectedObj.kD);
+        clampVector(diffuse);
+        specular.copy(sIntensity).multiplyScalar(intersectedObj.kS);
+        clampVector(specular);
+        transmitted.copy(tIntensity).multiplyScalar(intersectedObj.kT);
+        clampVector(transmitted);
+
+        color.add(RayTracer.ambient).add(diffuse).add(specular).add(transmitted);
+        clampVector(color);
+        return color.multiplyVectors(color, intersectedObj.color);
     }
 }
