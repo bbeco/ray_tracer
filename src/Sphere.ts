@@ -2,8 +2,20 @@ import { Ray } from "./Ray";
 import { eps } from "./utils";
 import { Vector3 } from "./Vector3";
 
-export class Sphere {
+/**
+ * Scale the viewer's direction so that its projection along n has unitary length.
+ * This computes the vector that Whitted called `v'` in his paper.
+ */
+const scaleViewerDirection = (() => {
+    const v = new Vector3();
+    return (r: Ray, n: Vector3) => {
+        v.copy(r.direction);
+        v.multiplyScalar(-1 / v.dot(n));
+        return v.clone();
+    };
+})();
 
+export class Sphere {
     // The position of the centre of the sphere
     public center: Vector3;
 
@@ -11,39 +23,7 @@ export class Sphere {
     public radius: number;
 
     // The diffuse color of the sphere
-    public cDiffuse: Vector3;
-
-    // Diffuse reflection constant
-    private _kD: number;
-
-    // Specular reflection coefficient
-    private kS: number;
-
-    // Transmission coefficient
-    private kT: number;
-
-    // Index of refraction;
-    private kN: number;
-
-    constructor() {
-        this.cDiffuse = new Vector3([1, 1, 1]);
-        this._kD = 1.0;
-        this.kS = 1.0;
-        this.kT = 1.0;
-        this.kN = 1.0;
-
-        this.center = new Vector3();
-        this.radius = 1.0;
-    }
-
-    get kD(): number {
-        return this._kD;
-    }
-
-    // returns the normal of the point of the sphere that is the closest to the query point
-    public normal(query: Vector3): Vector3 {
-        return query.clone().sub(this.center).normalize();
-    }
+    public color: Vector3;
 
     /**
      * Compute the refraction of r at point p.
@@ -54,8 +34,52 @@ export class Sphere {
      * @returns
      * @memberof Sphere
      */
-    public computeRefractedRay(p: Vector3, r: Ray) {
-        return new Ray(p, new Vector3());
+    public computeRefractedRay = (() => {
+        const refractedDir = new Vector3();
+        const refractedOrigin = new Vector3();
+        return (p: Vector3, r: Ray) => {
+            const n = this.normal(p);
+            const v = scaleViewerDirection(r, n);
+            const invKf2 = Math.pow(this.kN, 2) * Math.pow(v.length(), 2) - Math.pow(n.add(v).length(), 2);
+            if (invKf2 === 0) {
+                // This is the case when light is entirely reflected.
+                return null;
+            }
+
+            const kF = 1 / Math.sqrt(invKf2);
+            refractedDir.copy(v).add(n).multiplyScalar(kF).sub(n);
+            refractedOrigin.copy(p).add(n.multiplyScalar(eps));
+            // The ray's origin is translated a little toward the normal to prevent the object itself from shadowing the
+            return new Ray(refractedOrigin, refractedDir.normalize());
+        };
+    })();
+
+    // Index of refraction;
+    public kN: number;
+
+    // Specular reflection coefficient
+    public kS: number;
+
+    // Diffuse reflection constant
+    public kD: number;
+
+    // Transmission coefficient
+    public kT: number;
+
+    constructor() {
+        this.color = new Vector3([1, 1, 1]);
+        this.kD = 1.0;
+        this.kS = 1.0;
+        this.kT = 1.0;
+        this.kN = 0.0;
+
+        this.center = new Vector3();
+        this.radius = 1.0;
+    }
+
+    // returns the normal of the point of the sphere that is the closest to the query point
+    public normal(query: Vector3): Vector3 {
+        return query.clone().sub(this.center).normalize();
     }
 
     /**
@@ -75,10 +99,7 @@ export class Sphere {
             return new Ray(p, r.direction);
         }
 
-        const v = r.direction.clone();
-        // the negative sign is due to the fact that v.dot(n) is always negative, and the formula requires its absolute
-        // value
-        v.multiplyScalar(-1 / v.dot(n));
+        const v = scaleViewerDirection(r, n);
         const reflectedDir = v.add(n.multiplyScalar(2));
         reflectedDir.normalize();
 
