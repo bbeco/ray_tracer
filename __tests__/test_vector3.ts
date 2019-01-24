@@ -1,5 +1,15 @@
 import { Vector3 } from "../src/Vector3";
 
+describe("Testing additions", () => {
+    test("Addition can be concatenated", () => {
+        const a = new Vector3([3, 3, 3]);
+        const b = new Vector3([1, 1, 1]);
+        const c = new Vector3([2, 2, 2]);
+        a.add(b).add(c);
+        expect(a).toEqual(new Vector3([6, 6, 6]));
+    });
+});
+
 describe("Testing clamping", () => {
     const min = new Vector3([0, 0, 0]);
     const max = new Vector3([10, 10, 10]);

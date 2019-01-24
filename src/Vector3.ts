@@ -42,6 +42,17 @@ export class Vector3 {
         return (new Vector3()).set(this.x, this.y, this.z);
     }
 
+    /**
+     * Copies the values of the passed vector3's x, y and z properties to this vector3.
+     * @param v the vector to be copied
+     */
+    public copy(v: Vector3): this {
+        this.x = v.x;
+        this.y = v.y;
+        this.z = v.z;
+        return this;
+    }
+
     public sub(v: Vector3): this {
         this.x -= v.x;
         this.y -= v.y;
