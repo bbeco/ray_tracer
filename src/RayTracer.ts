@@ -113,13 +113,15 @@ export class RayTracer {
         const intersectedObj = closestInt.obj!;
         const intersectionPoint = closestInt.point!;
         const rReflected = intersectedObj.computeReflectedRay(intersectionPoint, r);
-        const rRefracted = intersectedObj.computeRefractedRay(intersectionPoint, r);
-
         sIntensity.copy(this.trace(rReflected, depth - 1));
+
+        if (closestInt.obj!.kN > 0) {
+        const rRefracted = intersectedObj.computeRefractedRay(intersectionPoint, r);
         if (rRefracted) {
             tIntensity.copy(this.trace(rRefracted, depth - 1));
         } else {
             tIntensity.set(0, 0, 0);
+        }
         }
 
         return this.shade(closestInt, sIntensity, tIntensity);
