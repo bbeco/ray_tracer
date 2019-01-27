@@ -1,4 +1,4 @@
-import { Ray } from "./Ray";
+import { Ray, shiftRayOrigin } from "./Ray";
 import { eps } from "./utils";
 import { Vector3 } from "./Vector3";
 
@@ -6,14 +6,11 @@ import { Vector3 } from "./Vector3";
  * Scale the viewer's direction so that its projection along n has unitary length.
  * This computes the vector that Whitted called `v'` in his paper.
  */
-const scaleViewerDirection = (() => {
-    const v = new Vector3();
-    return (r: Ray, n: Vector3) => {
-        v.copy(r.direction);
-        v.multiplyScalar(-1 / v.dot(n));
-        return v.clone();
-    };
-})();
+function scaleViewerDirection(r: Ray, n: Vector3) {
+    const v = r.direction.clone();
+    v.multiplyScalar(-1 / v.dot(n));
+    return v;
+}
 
 export class Sphere {
     // The position of the centre of the sphere
@@ -25,36 +22,7 @@ export class Sphere {
     // The diffuse color of the sphere
     public color: Vector3;
 
-    /**
-     * Compute the refraction of r at point p.
-     *
-     * @private
-     * @param {Vector3} p
-     * @param {Ray} r
-     * @returns
-     * @memberof Sphere
-     */
-    public computeRefractedRay = (() => {
-        const refractedDir = new Vector3();
-        const refractedOrigin = new Vector3();
-        return (p: Vector3, r: Ray) => {
-            const n = this.normal(p);
-            const v = scaleViewerDirection(r, n);
-            const invKf2 = Math.pow(this.kN, 2) * Math.pow(v.length(), 2) - Math.pow(n.add(v).length(), 2);
-            if (invKf2 === 0) {
-                // This is the case when light is entirely reflected.
-                return null;
-            }
-
-            const kF = 1 / Math.sqrt(invKf2);
-            refractedDir.copy(v).add(n).multiplyScalar(kF).sub(n);
-            refractedOrigin.copy(p).add(n.multiplyScalar(eps));
-            // The ray's origin is translated a little toward the normal to prevent the object itself from shadowing the
-            return new Ray(refractedOrigin, refractedDir.normalize());
-        };
-    })();
-
-    // Index of refraction;
+    // Index of refraction, this is 0 for opaque (non-transparent) objects.
     public kN: number;
 
     // Specular reflection coefficient
@@ -69,12 +37,48 @@ export class Sphere {
     constructor() {
         this.color = new Vector3([1, 1, 1]);
         this.kD = 1.0;
-        this.kS = 1.0;
-        this.kT = 1.0;
+        this.kS = 0.5;
+        this.kT = 0.5;
         this.kN = 0.0;
 
         this.center = new Vector3();
         this.radius = 1.0;
+    }
+
+    /**
+     * Compute the refraction of r at point p.
+     *
+     * @private
+     * @param {Vector3} p
+     * @param {Ray} r
+     * @returns
+     * @memberof Sphere
+     */
+    public computeRefractedRay(p: Vector3, r: Ray): Ray | null {
+        const refractedDir = new Vector3();
+        const refractedOrigin = new Vector3();
+
+        const n = this.normal(p);
+        // store whether `r` is travelling inside the object or not. If we are inside the object, we need to adjust the
+        // the index of refraction and the normal direction.
+        const inside = n.dot(r.direction) >= 0;
+        if (inside) {
+            n.multiplyScalar(-1);
+        }
+        const kN = inside ? 1 / this.kN : this.kN;
+
+        const v = scaleViewerDirection(r, n);
+        const invKf2 = Math.pow(kN, 2) * Math.pow(v.length(), 2) - Math.pow(n.clone().add(v).length(), 2);
+        if (invKf2 <= 0) {
+            // This is the case when light is entirely reflected.
+            return null;
+        }
+
+        const kF = 1 / Math.sqrt(invKf2);
+        refractedDir.copy(v).add(n).multiplyScalar(kF).sub(n).normalize();
+        refractedOrigin.copy(p);
+        // The ray's origin is translated a little toward the normal to prevent the object itself from shadowing the
+        return shiftRayOrigin(new Ray(refractedOrigin, refractedDir), n.multiplyScalar(-1));
     }
 
     // returns the normal of the point of the sphere that is the closest to the query point
@@ -99,13 +103,18 @@ export class Sphere {
             return new Ray(p, r.direction);
         }
 
+        const inside = n.dot(r.direction) > 0;
+        if (inside) {
+            n.multiplyScalar(-1);
+        }
+
         const v = scaleViewerDirection(r, n);
-        const reflectedDir = v.add(n.multiplyScalar(2));
+        const reflectedDir = v.add(n.clone().multiplyScalar(2));
         reflectedDir.normalize();
 
         // The ray's origin is translated a little toward the normal to prevent the object itself from shadowing the ray
         const origin = p.clone().add(this.normal(p).multiplyScalar(eps));
-        return new Ray(origin, reflectedDir.normalize());
+        return shiftRayOrigin(new Ray(origin, reflectedDir), n);
     }
 
     // In case there are two intersection points, this method returns the one that is closer to the ray's origin.
@@ -144,7 +153,7 @@ export class Sphere {
                 return ray.origin.clone();
             }
 
-            return (interpolate(minT));
+            return interpolate(minT);
         }
     }
 }
