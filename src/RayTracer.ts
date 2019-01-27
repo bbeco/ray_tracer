@@ -12,22 +12,26 @@ class Scene {
     public camera: Camera;
 
     constructor(res?: number[]) {
-        const s0 = new Sphere();
-        s0.center.set(-1.5, 0, -8.01);
-        s0.radius = 1;
+        const sWhite = new Sphere();
+        sWhite.center.set(-1.5, 0, -8.01);
+        // s0.center.set(-0.5, -0.5, -5.5);
+        sWhite.radius = 1;
 
-        const s1 = new Sphere();
-        s1.center.set(0.5, -1, -8.01);
-        s1.color.set(1, 0, 0);
-        s1.radius = 1;
+        const sRed = new Sphere();
+        sRed.center.set(0.5, -1, -8.01);
+        sRed.color.set(1, 0, 0);
+        sRed.radius = 1;
 
-        const s2 = new Sphere();
-        s2.center.set(-0.5, -0.5, -6.01);
-        s2.color.set(1, 1, 1);
-        s2.kN = 2.0;
-        s2.radius = 2.0;
+        const sTransparent = new Sphere();
+        sTransparent.center.set(-0.5, -0.5, -5.5);
+        sTransparent.color.set(0.8, 1, 0.8);
+        sTransparent.kN = 1.1;
+        sTransparent.kD = 0.1;
+        sTransparent.kS = 0.1;
+        sTransparent.kT = 1.0;
+        sTransparent.radius = 1.0;
 
-        this.objectList = [s0, s1, s2];
+        this.objectList = [sWhite, sRed, sTransparent];
         // this.objectList = [s0, s1];
         this.lightList = [
             new Light(new Vector3([0, 1.5, -6.5]), new Vector3([1, 1, 1])),
@@ -38,7 +42,7 @@ class Scene {
 }
 
 export class RayTracer {
-    public static readonly MaxDepth = 10;
+    public static readonly MaxDepth = 4;
 
     /**
      * ambient light.
@@ -116,12 +120,12 @@ export class RayTracer {
         sIntensity.copy(this.trace(rReflected, depth - 1));
 
         if (closestInt.obj!.kN > 0) {
-        const rRefracted = intersectedObj.computeRefractedRay(intersectionPoint, r);
-        if (rRefracted) {
-            tIntensity.copy(this.trace(rRefracted, depth - 1));
-        } else {
-            tIntensity.set(0, 0, 0);
-        }
+            const rRefracted = intersectedObj.computeRefractedRay(intersectionPoint, r);
+            if (rRefracted) {
+                tIntensity.copy(this.trace(rRefracted, depth - 1));
+            } else {
+                tIntensity.set(0, 0, 0);
+            }
         }
 
         return this.shade(closestInt, sIntensity, tIntensity);
