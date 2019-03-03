@@ -12,6 +12,10 @@
 			"check-format",
 			"allow-leading-underscore",
 			"allow-pascal-case"
+		],
+		"interface-name": [
+			false,
+			"always-prefix"
 		]
 	},
 	"rulesDirectory": []
