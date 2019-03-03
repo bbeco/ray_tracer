@@ -111,3 +111,10 @@ export class Vector3 {
         return this;
     }
 }
+
+export function isVector3(x: any): x is Vector3 {
+    return x && typeof x.x === "number" && typeof x.y === "number" && typeof x.z === "number"
+        && x.length && x.lengthSq && x.add
+        && x.clone && x.copy && x.dot && x.clamp && x.normalize && x.set && x.sub && x.multiplyScalar
+        && x.multiplyVectors;
+}
