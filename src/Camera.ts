@@ -2,23 +2,23 @@ import { Ray } from "./Ray";
 import { Vector3 } from "./Vector3";
 
 export class ImageSensor {
-    // The sensor resolution
-    public res: number[];
-
     // pixel density in the horizontal direction.
     public kU: number;
 
     // pixel density in the vertical direction.
     public kV: number;
 
-    // principal point coordinates
-    public u0: number;
-    public v0: number;
-
     // The focal length.
     // Even though this does not depends on the image sensor, we keep it here because this is yet another intrinsic
     // parameter
     public fLength: number;
+
+    // The sensor resolution
+    private _res: number[];
+
+    // principal point coordinates
+    private _u0: number;
+    private _v0: number;
 
     constructor(res?: number[], f?: number, kU?: number, kV?: number) {
         if (res) {
@@ -28,24 +28,35 @@ export class ImageSensor {
             if (!Number.isInteger(res[0]) || !Number.isInteger(res[1])) {
                 throw new Error("res has to be an array of integer numbers");
             }
-            this.res = res;
+            this._res = res;
         } else {
-            this.res = [640, 480];
+            this._res = [640, 480];
         }
 
         this.fLength = f ? f : 1.0;
 
         this.kU = kU ? kU : 1.0;
         this.kV = kV ? kV : 1.0;
-        this.u0 = Math.floor(this.res[0] / 2);
-        this.v0 = Math.floor(this.res[1] / 2);
+        this._u0 = Math.floor(this._res[0] / 2);
+        this._v0 = Math.floor(this._res[1] / 2);
     }
 
-    public printProjectionMatrix() {
-        console.log("camera matrix:\n" +
-            `${this.fLength * this.kU} 0 ${this.u0}\n` +
-            `${this.fLength * this.kV} 0 ${this.v0}\n` +
-            `0 0 1`);
+    get u0(): number {
+        return this._u0;
+    }
+
+    get v0(): number {
+        return this._v0;
+    }
+
+    get res(): number[] {
+        return this._res;
+    }
+
+    set res(newRes: number[]) {
+        this._res = newRes;
+        this._u0 = Math.floor(this._res[0] / 2);
+        this._v0 = Math.floor(this._res[1] / 2);
     }
 }
 
