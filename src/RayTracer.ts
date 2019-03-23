@@ -6,7 +6,7 @@ import { Sphere } from "./Sphere";
 import { clampVector, distanceSq } from "./utils";
 import { Vector3 } from "./Vector3";
 
-class Scene {
+export class Scene {
     public objectList: Sphere[];
     public lightList: Light[];
     public camera: Camera;
@@ -51,7 +51,7 @@ export class RayTracer {
      * @static
      * @memberof RayTracer
      */
-    public static readonly ambient = new Vector3([0.01, 0.01, 0.01]);
+    public ambient: Vector3;
 
     private static backgroundColor = new Vector3();
 
@@ -76,6 +76,7 @@ export class RayTracer {
 
     constructor(res?: number[]) {
         this.scene = new Scene();
+        this.ambient = new Vector3([0.01, 0.01, 0.01]);
         const sensor = this.scene.camera.sensor;
         sensor.res = res ? res : [320, 240];
         sensor.fLength = 35.0;
@@ -168,7 +169,7 @@ export class RayTracer {
         transmitted.copy(tIntensity).multiplyScalar(intersectedObj.kT);
         clampVector(transmitted);
 
-        color.add(RayTracer.ambient).add(diffuse).add(specular).add(transmitted);
+        color.add(this.ambient).add(diffuse).add(specular).add(transmitted);
         clampVector(color);
         return color.multiplyVectors(color, intersectedObj.color);
     }
