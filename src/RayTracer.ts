@@ -145,7 +145,7 @@ export class RayTracer {
         for (const light of this.scene.lightList) {
             const l = light.position.clone().sub(point).normalize();
             const lightRay = new Ray(
-                point.add(normal.clone().multiplyScalar(RayTracer.eps)),
+                point.clone().add(normal.clone().multiplyScalar(RayTracer.eps)),
                 l);
             let shaded = false;
             for (const obj of this.scene.objectList) {

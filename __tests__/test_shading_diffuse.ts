@@ -1,9 +1,9 @@
-import { Sphere } from "../src/Sphere";
-import { Vector3 } from "../src/Vector3";
-import { PointLight } from "../src/Light";
-import { Scene, RayTracer } from "../src/RayTracer";
 import { IntersectionPoint } from "../src/IntersectionPoint";
+import { PointLight } from "../src/Light";
+import { RayTracer, Scene } from "../src/RayTracer";
+import { Sphere } from "../src/Sphere";
 import { areAlmostEqual } from "../src/utils";
+import { Vector3 } from "../src/Vector3";
 
 describe("A lambertian surface (completely diffuse) is used to test the effect of several lights", () => {
     const obj = new Sphere();

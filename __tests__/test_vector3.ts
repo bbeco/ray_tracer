@@ -42,3 +42,13 @@ describe("Testing component-wise multiplication", () => {
         expect(a.multiplyVectors(a, b)).toEqual(expected);
     });
 });
+
+describe("Testing scalar multiplication", () => {
+    test("scalar multiplication", () => {
+        const a = new Vector3([1, 0, 2]);
+        a.multiplyScalar(0.5);
+        const expected = new Vector3([0.5, 0, 1]);
+
+        expect(a).toEqual(expected);
+    });
+});
