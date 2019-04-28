@@ -8,10 +8,10 @@ import { Vector3 } from "../src/Vector3";
 describe("A lambertian surface (completely diffuse) is used to test the effect of several lights", () => {
     const obj = new Sphere();
     obj.center.set(0, -1, 0);
-    obj.kD = 1;
-    obj.kT = 0;
-    obj.kS = 0;
-    obj.kN = 0;
+    obj.material.kD = 1;
+    obj.material.kT = 0;
+    obj.material.kS = 0;
+    obj.material.kN = 0;
 
     const xCoordinate = Math.sqrt(3) / 2;
     const light1 = new PointLight(new Vector3([-xCoordinate, 0.5, 0]));

@@ -1,4 +1,4 @@
-import { Sphere } from "./Sphere";
+import { Thing } from "./Thing";
 import { Vector3 } from "./Vector3";
 
 // Describe the intersection that occurs between a ray and a generic scene object
@@ -10,7 +10,7 @@ export class IntersectionPoint {
     public normal?: Vector3;
 
     // A reference to the object that was intersected
-    public obj?: Sphere;
+    public obj?: Thing;
 
     // The squared distance between the intersection point and the camera's centre of projection
     public distanceSq: number;
@@ -27,7 +27,7 @@ export class IntersectionPoint {
      * @param obj
      * @param distanceSq
      */
-    public set(point: Vector3, normal: Vector3, obj: Sphere, distanceSq: number) {
+    public set(point: Vector3, normal: Vector3, obj: Thing, distanceSq: number) {
         this.point = point;
         this.normal = normal;
         this.obj = obj;

@@ -1,13 +1,15 @@
 import { Camera, ImageSensor } from "./Camera";
 import { IntersectionPoint as Intersection } from "./IntersectionPoint";
 import { PointLight as Light } from "./Light";
+import { Plane } from "./Plane";
 import { Ray } from "./Ray";
 import { Sphere } from "./Sphere";
+import { Thing } from "./Thing";
 import { clampVector, distanceSq } from "./utils";
 import { Vector3 } from "./Vector3";
 
 export class Scene {
-    public objectList: Sphere[];
+    public objectList: Thing[];
     public lightList: Light[];
     public camera: Camera;
 
@@ -19,17 +21,19 @@ export class Scene {
 
         const sRed = new Sphere();
         sRed.center.set(0.5, -1, -8.01);
-        sRed.color.set(1, 0, 0);
+        sRed.material.color.set(1, 0, 0);
         sRed.radius = 1;
 
         const sTransparent = new Sphere();
         sTransparent.center.set(-0.5, -0.5, -5.5);
-        sTransparent.color.set(0.8, 1, 0.8);
-        sTransparent.kN = 1.1;
-        sTransparent.kD = 0.1;
-        sTransparent.kS = 0.1;
-        sTransparent.kT = 1.0;
+        sTransparent.material.color.set(0.8, 1, 0.8);
+        sTransparent.material.kN = 1.1;
+        sTransparent.material.kD = 0.1;
+        sTransparent.material.kS = 0.1;
+        sTransparent.material.kT = 1.0;
         sTransparent.radius = 1.0;
+
+        const plane = new Plane(new Vector3([0, 0, -20]), new Vector3([0, 0, -1]));
 
         this.objectList = [sWhite, sRed, sTransparent];
         // this.objectList = [s0, s1];
@@ -43,17 +47,6 @@ export class Scene {
 
 export class RayTracer {
     public static readonly MaxDepth = 4;
-
-    /**
-     * ambient light.
-     *
-     * @private
-     * @static
-     * @memberof RayTracer
-     */
-    public ambient: Vector3;
-
-    private static backgroundColor = new Vector3();
 
     /**
      * This value is used to add a margin around each object's bounding box so that when I compute the rays from the
@@ -71,6 +64,17 @@ export class RayTracer {
      * @memberof RayTracer
      */
     private static eps = 1e-6;
+
+    /**
+     * ambient light.
+     *
+     * @private
+     * @static
+     * @memberof RayTracer
+     */
+    public ambient: Vector3;
+
+    // private static backgroundColor = new Vector3();
 
     public scene: Scene;
 
@@ -120,7 +124,7 @@ export class RayTracer {
         const rReflected = intersectedObj.computeReflectedRay(intersectionPoint, r);
         sIntensity.copy(this.trace(rReflected, depth - 1));
 
-        if (closestInt.obj!.kN > 0) {
+        if (closestInt.obj!.material.kN > 0) {
             const rRefracted = intersectedObj.computeRefractedRay(intersectionPoint, r);
             if (rRefracted) {
                 tIntensity.copy(this.trace(rRefracted, depth - 1));
@@ -162,15 +166,15 @@ export class RayTracer {
             }
         }
 
-        diffuse.multiplyScalar(intersectedObj.kD);
+        diffuse.multiplyScalar(intersectedObj.material.kD);
         clampVector(diffuse);
-        specular.copy(sIntensity).multiplyScalar(intersectedObj.kS);
+        specular.copy(sIntensity).multiplyScalar(intersectedObj.material.kS);
         clampVector(specular);
-        transmitted.copy(tIntensity).multiplyScalar(intersectedObj.kT);
+        transmitted.copy(tIntensity).multiplyScalar(intersectedObj.material.kT);
         clampVector(transmitted);
 
         color.add(this.ambient).add(diffuse).add(specular).add(transmitted);
         clampVector(color);
-        return color.multiplyVectors(color, intersectedObj.color);
+        return color.multiplyVectors(color, intersectedObj.material.color);
     }
 }
