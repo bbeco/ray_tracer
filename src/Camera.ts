@@ -81,6 +81,6 @@ export class Camera {
         direction.y = (this.sensor.v0 - vIndex) / (this.sensor.fLength * this.sensor.kV);
         direction.z = -1;
 
-        return new Ray(new Vector3([0, 0, 0]), direction.normalize());
+        return new Ray(new Vector3(0, 0, 0), direction.normalize());
     }
 }

@@ -11,7 +11,7 @@ export class Sphere extends Thing {
     public radius: number;
 
     constructor() {
-        super(new Vector3([1, 1, 1]), 1.0, 0.5, 0.5, 0.0);
+        super(new Vector3(1, 1, 1), 1.0, 0.5, 0.5, 0.0);
         this.center = new Vector3();
         this.radius = 1.0;
     }

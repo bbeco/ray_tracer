@@ -33,12 +33,12 @@ export class Scene {
         sTransparent.material.kT = 1.0;
         sTransparent.radius = 1.0;
 
-        const plane = new Plane(new Vector3([0, 0, -20]), new Vector3([0, 0, -1]));
+        const plane = new Plane(new Vector3(0, 0, -20), new Vector3(0, 0, -1));
 
         this.objectList = [sWhite, sRed, sTransparent];
         // this.objectList = [s0, s1];
         this.lightList = [
-            new Light(new Vector3([0, 1.5, -6.5]), new Vector3([1, 1, 1])),
+            new Light(new Vector3(0, 1.5, -6.5), new Vector3(1, 1, 1)),
         ];
         const sensor = res ? new ImageSensor(res, 35.0, 20, 480 / 18) : new ImageSensor([640, 480], 1.0, 1.0, 1.0);
         this.camera = new Camera(sensor);
@@ -80,7 +80,7 @@ export class RayTracer {
 
     constructor(res?: number[]) {
         this.scene = new Scene();
-        this.ambient = new Vector3([0.01, 0.01, 0.01]);
+        this.ambient = new Vector3(0.01, 0.01, 0.01);
         const sensor = this.scene.camera.sensor;
         sensor.res = res ? res : [320, 240];
         sensor.fLength = 35.0;

@@ -21,8 +21,8 @@ export function areAlmostEqual(a: Vector3, b: Vector3): boolean {
 }
 
 export const clampVector = (() => {
-    const min = new Vector3([0, 0, 0]);
-    const max = new Vector3([1, 1, 1]);
+    const min = new Vector3(0, 0, 0);
+    const max = new Vector3(1, 1, 1);
     return (v: Vector3): void => {
         v.clamp(min, max);
     };

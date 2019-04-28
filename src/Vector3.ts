@@ -3,16 +3,10 @@ export class Vector3 {
     public y: number;
     public z: number;
 
-    constructor(pos?: number[]) {
-        if (pos) {
-            this.x = pos[0];
-            this.y = pos[1];
-            this.z = pos[2];
-        } else {
-            this.x = 0.0;
-            this.y = 0.0;
-            this.z = 0.0;
-        }
+    constructor(x?: number, y?: number, z?: number) {
+        this.x = x || 0.0;
+        this.y = y || 0.0;
+        this.z = z || 0.0;
     }
 
     public lengthSq(): number {
