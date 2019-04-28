@@ -1,3 +1,4 @@
+import { Vector2 } from "./Vector2";
 import { Vector3 } from "./Vector3";
 
 /**
@@ -27,3 +28,22 @@ export const clampVector = (() => {
         v.clamp(min, max);
     };
 })();
+
+/**
+ * @brief Check whether `p` on the left side w.r.t. the line defined by `p0` and `p1`.
+ *
+ * This function computes the cross product between the vectors (p1 - p0) and (p - p0) and it is taken from [1].
+ * The line is considered infinite for this check but `p0` and `p1` are needed to define its direction.
+ *
+ * [1] http://geomalgorithms.com/a01-_area.html
+ *
+ * @export
+ * @param {Vector2} p0 The start of the line
+ * @param {Vector2} p1 The end of the line; the line is considered infinite for this check.
+ * @param {Vector2} p The point to be checked
+ * @returns {number} a positive number if the point in on the left of the line, a negative number if it is on the right,
+ * or 0 if the point lies on the line.
+ */
+export function isLeft(p0: Vector2, p1: Vector2, p: Vector2): number {
+    return (p1.x - p0.x) * (p.y - p0.y) - (p1.y - p0.y) * (p.x - p0.x);
+}
