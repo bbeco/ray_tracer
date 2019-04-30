@@ -104,6 +104,20 @@ export class Vector3 {
 
         return this;
     }
+
+    /**
+     * @brief Set this vector to the cross product of itselft and `v`
+     *
+     * @param {Vector3} v
+     * @returns {this}
+     * @memberof Vector3
+     */
+    public cross(v: Vector3): this {
+        const newX = this.y * v.z - this.z * v.y;
+        const newY = this.x * v.z - this.z * v.x;
+        const newZ = this.x * v.y - this.y * v.x;
+        return this.set(newX, newY, newZ);
+    }
 }
 
 export function isVector3(x: any): x is Vector3 {

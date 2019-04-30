@@ -1,3 +1,4 @@
+import { Polygon } from "./Polygon";
 import { Vector2 } from "./Vector2";
 import { Vector3 } from "./Vector3";
 
@@ -46,4 +47,36 @@ export const clampVector = (() => {
  */
 export function isLeft(p0: Vector2, p1: Vector2, p: Vector2): number {
     return (p1.x - p0.x) * (p.y - p0.y) - (p1.y - p0.y) * (p.x - p0.x);
+}
+
+/**
+ * @brief Given a polygon, this finds the line where the polygon's normal lies onto. This pseudo-normal is enough to
+ * reproject the polygon on an axis-aligned plane.
+ *
+ * @export
+ * @param {Polygon<Vector3>} The input 3D polygon
+ * @returns {Vector3} a vector that lies on the same line the polygon's normal lies onto.
+ */
+export function polygonOrientation(poly: Polygon<Vector3>): Vector3 {
+    const directions: Vector3[] = [];
+    for (let i = 0; i < poly.points.length; ++i) {
+        directions.push(
+            poly.points[(i + 1) % poly.points.length].clone().sub(poly.points[i]).normalize());
+    }
+
+    // search for two directions that are almost orthogonal
+    let bestI: number = 0;
+    let bestJ: number = 0;
+    let bestAngle: number = 1;
+    for (let i = 1; i < directions.length - 1; ++i) {
+        for (let j = i + 1; j < directions.length; ++j) {
+            const angle = Math.abs(directions[i].dot(directions[j]));
+            if (angle < bestAngle) {
+                bestI = i;
+                bestJ = j;
+                bestAngle = angle;
+            }
+        }
+    }
+    return directions[bestI].cross(directions[bestJ]);
 }
