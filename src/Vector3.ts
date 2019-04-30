@@ -118,6 +118,26 @@ export class Vector3 {
         const newZ = this.x * v.y - this.y * v.x;
         return this.set(newX, newY, newZ);
     }
+
+    public toArray(): number[] {
+        return [this.x, this.y, this.z];
+    }
+
+    public setComponent(index: number, value: number): void {
+        switch (index) {
+            case 0:
+                this.x = value;
+                break;
+            case 1:
+                this.y = value;
+                break;
+            case 2:
+                this.z = value;
+                break;
+            default:
+                throw new Error("Invalid index value");
+        }
+    }
 }
 
 export function isVector3(x: any): x is Vector3 {

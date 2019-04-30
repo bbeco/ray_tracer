@@ -57,7 +57,7 @@ export function isLeft(p0: Vector2, p1: Vector2, p: Vector2): number {
  * @param {Polygon<Vector3>} The input 3D polygon
  * @returns {Vector3} a vector that lies on the same line the polygon's normal lies onto.
  */
-export function polygonOrientation(poly: Polygon<Vector3>): Vector3 {
+function polygonOrientation(poly: Polygon<Vector3>): Vector3 {
     const directions: Vector3[] = [];
     for (let i = 0; i < poly.points.length; ++i) {
         directions.push(
@@ -79,4 +79,17 @@ export function polygonOrientation(poly: Polygon<Vector3>): Vector3 {
         }
     }
     return directions[bestI].cross(directions[bestJ]);
+}
+
+export function projectPolygon(poly: Polygon<Vector3>): Polygon<Vector3> {
+    const idx = polygonOrientation(poly).toArray().reduce((min: number, curr: number) => {
+        if (curr < min) {
+            curr = min;
+        }
+        return min;
+    });
+    return new Polygon<Vector3>(poly.points.slice().map((v: Vector3) => {
+        v.setComponent(idx, 0);
+        return v;
+    }));
 }

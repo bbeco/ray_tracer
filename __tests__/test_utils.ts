@@ -1,5 +1,5 @@
 import { Polygon } from "../src/Polygon";
-import { areAlmostEqual, isLeft, polygonOrientation } from "../src/utils";
+import { isLeft, projectPolygon } from "../src/utils";
 import { Vector2 } from "../src/Vector2";
 import { Vector3 } from "../src/Vector3";
 
@@ -20,18 +20,20 @@ describe("isLeft checks if a point lies on the left of a given line", () => {
     });
 });
 
-describe("polygonOrientation returns the normal of a 3D polygon that lies on a plane", () => {
-    const A = new Vector3(0, 0, 0);
-    const B = new Vector3(1, 0, 0);
-    const C = new Vector3(1, 1, 0);
-    const D = new Vector3(0, 1, 0);
+describe("projectPolygon returns a new 3D polygon that is the projection on an axis-aligned plane", () => {
+    const A = new Vector3(0, 0, 5);
+    const B = new Vector3(1, 0, 5);
+    const C = new Vector3(1, 1, 10);
+    const D = new Vector3(0, 1, 10);
 
     const poly = new Polygon([A, B, C, D]);
-    test("The normal is the cross produce between two directions that lies on the polygon", () => {
-        const res = polygonOrientation(poly);
-        const expected = new Vector3(0, 0, 1);
+    test("The polygon is projected on the xy plane", () => {
+        const res = projectPolygon(poly);
 
-        expected.multiplyScalar(Math.sqrt(2) / 2);
-        expect(areAlmostEqual(res, expected));
+        for (let i = 0; i < poly.points.length; ++i) {
+            expect(res.points[i].x === poly.points[i].x);
+            expect(res.points[i].y === poly.points[i].y);
+            expect(res.points[i].z === 0);
+        }
     });
 });
