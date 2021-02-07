@@ -5,10 +5,10 @@
   "author": "Andrea Beconcini",
   "license": "MIT",
   "scripts": {
-    "build": "tslint --project . && webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js",
     "test": "jest",
     "clean": "rm -fr dist/",
-    "watch": "tslint --project . && webpack --config webpack.config.js --watch"
+    "watch": "webpack --config webpack.config.js --watch"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
